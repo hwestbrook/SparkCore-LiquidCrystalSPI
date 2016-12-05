@@ -1,5 +1,5 @@
 /*
- * HARDWARE AND SOFTWARE LIQUIDCRYSTAL SPI 
+ * HARDWARE AND SOFTWARE LIQUIDCRYSTAL SPI
  * 74HC595 LIBRARY FOR SPARK CORE
  * =======================================================
  *  Author: BDub
@@ -12,17 +12,17 @@
 // When the display powers up, it is configured as follows:
 //
 // 1. Display clear
-// 2. Function set: 
-//    DL = 1; 8-bit interface data 
-//    N = 0; 1-line display 
-//    F = 0; 5x8 dot character font 
-// 3. Display on/off control: 
-//    D = 0; Display off 
-//    C = 0; Cursor off 
-//    B = 0; Blinking off 
-// 4. Entry mode set: 
-//    I/D = 1; Increment by 1 
-//    S = 0; No shift 
+// 2. Function set:
+//    DL = 1; 8-bit interface data
+//    N = 0; 1-line display
+//    F = 0; 5x8 dot character font
+// 3. Display on/off control:
+//    D = 0; Display off
+//    C = 0; Cursor off
+//    B = 0; Blinking off
+// 4. Entry mode set:
+//    I/D = 1; Increment by 1
+//    S = 0; No shift
 //
 // Note, however, that resetting the Arduino doesn't reset the LCD, so we
 // can't assume that its in that state when a sketch starts (and the
@@ -69,12 +69,12 @@ LiquidCrystal::LiquidCrystal(uint8_t ss, uint8_t sclk, uint8_t sdat) //SPI  ####
   }
   _sclkPin = sclk;
   _sdatPin = sdat;
-  
+
   /*
   initSPI(ssPin);
   //shiftRegister pins 1,2,3,4,5,6,7 represent rs, rw, enable, d4-7 in that order
   //but we are not using RW so RW it's zero or 255
-  init(1, 1, 255, 3, 0, 0, 0, 0, 4, 5, 6, 7, 255);   
+  init(1, 1, 255, 3, 0, 0, 0, 0, 4, 5, 6, 7, 255);
   */
 }
 
@@ -82,7 +82,7 @@ void LiquidCrystal::initSPI(void) //SPI ########################################
 {
   // initialize SPI:
   _usingSpi = true;
-  
+
   pinMode (_latchPin, OUTPUT); // setup _latchPin used in hardware and software SPI
   digitalWrite(_latchPin, HIGH);
 
@@ -95,22 +95,22 @@ void LiquidCrystal::initSPI(void) //SPI ########################################
   }
   else { // Else set up the hardware SPI
     SPI.begin();
-    
+
     //_clockDivider = SPI_CLOCK_DIV4; // 72MHz / 4 = 18MHz (works but takes just as long as 9MHz)
     _clockDivider = SPI_CLOCK_DIV8; // 72MHz / 8 = 9MHz (Really is about twice as fast as 4.5MHz)
     //_clockDivider = SPI_CLOCK_DIV16; // 72MHz / 16 = 4.5MHz
     SPI.setClockDivider(_clockDivider);
     // FYI: Software SPI is about the same speed as SPI_CLOCK_DIV8 ! :)
-    
+
     // Set data mode to SPI_MODE0 by default
     _dataMode = SPI_MODE0;
     SPI.setDataMode(_dataMode);
-    
+
     // Set bitOrder to MSBFIRST by default
-    _bitOrder = MSBFIRST; 
+    _bitOrder = MSBFIRST;
     SPI.setBitOrder(_bitOrder);
   }
-  
+
   // Adafruit SPI/I2C LCD Backpack or Discrete hookup to 74HC595
   // pins represent: fourbitmode, rs, rw, enable, d0, d1, d2, d3, d4, d5, d6, d7, backlight
   init(1, 1, 255, 2, 0, 0, 0, 0, 6, 5, 4, 3, 7);
@@ -125,32 +125,32 @@ void LiquidCrystal::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t en
   _enable_pin = enable;
   _backlight_pin = backlight;
   _backlight = 0; // off by default
-  
+
   _data_pins[0] = d0;
   _data_pins[1] = d1;
   _data_pins[2] = d2;
-  _data_pins[3] = d3; 
+  _data_pins[3] = d3;
   _data_pins[4] = d4;
   _data_pins[5] = d5;
   _data_pins[6] = d6;
-  _data_pins[7] = d7; 
-  
+  _data_pins[7] = d7;
+
   pinMode(_rs_pin, OUTPUT);
   // we can save 1 pin by not using RW. Indicate by passing 255 instead of pin#
-  if (_rw_pin != 255) { 
+  if (_rw_pin != 255) {
     pinMode(_rw_pin, OUTPUT);
   }
   pinMode(_enable_pin, OUTPUT);
-  
+
   // Always 4-bit mode, don't waste pins!
   //
   //if (fourbitmode)
     _displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
-  //else 
+  //else
     //_displayfunction = LCD_8BITMODE | LCD_1LINE | LCD_5x8DOTS;
-  
+
   //begin(16, 2); // commented out, make sure you call this in code!
-  
+
   //since in initSPI constructor we set _usingSPI to true and we run it first
   //from SPI constructor, we do nothing here otherwise we set it to false
   if (_usingSpi) //SPI ######################################################
@@ -160,7 +160,7 @@ void LiquidCrystal::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t en
   else
   {
     _usingSpi = false;
-  } 
+  }
 }
 
 void LiquidCrystal::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
@@ -178,28 +178,28 @@ void LiquidCrystal::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
   // according to datasheet, we need at least 40ms after power rises above 2.7V
   // before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
-  delayMicroseconds(50000); 
+  delayMicroseconds(50000);
   // Now we pull both RS and R/W low to begin commands
   digitalWrite(_rs_pin, LOW);
   digitalWrite(_enable_pin, LOW);
-  if (_rw_pin != 255) { 
+  if (_rw_pin != 255) {
     digitalWrite(_rw_pin, LOW);
   }
-  
+
   // 4-Bit initialization sequence from Technobly
   write4bits(0x03);         // Put back into 8-bit mode
   delayMicroseconds(5000);
 
   write4bits(0x08);         // Comment this out for V1 OLED
   delayMicroseconds(5000);  // Comment this out for V1 OLED
-  
+
   write4bits(0x02);         // Put into 4-bit mode
   delayMicroseconds(5000);
   write4bits(0x02);
   delayMicroseconds(5000);
   write4bits(0x08);
   delayMicroseconds(5000);
-  
+
   command(LCD_DISPLAYCONTROL);                  // Turn Off
   delayMicroseconds(5000);
   command(LCD_FUNCTIONSET | _displayfunction);  // Set # lines, font size, etc.
@@ -232,7 +232,7 @@ void LiquidCrystal::setCursor(uint8_t col, uint8_t row)
   if ( row > _numlines ) {
     row = _numlines-1;    // we count rows starting w/0
   }
-  
+
   command(LCD_SETDDRAMADDR | (col + row_offsets[row]));
 }
 
@@ -345,12 +345,12 @@ void LiquidCrystal::send(uint8_t value, uint8_t mode) {
     digitalWrite(_rs_pin, mode);
 
     // if there is a RW pin indicated, set it low to Write
-    if (_rw_pin != 255) { 
+    if (_rw_pin != 255) {
       digitalWrite(_rw_pin, LOW);
     }
-    
+
     if (_displayfunction & LCD_8BITMODE) {
-      write8bits(value); 
+      write8bits(value);
     } else {
       write4bits(value>>4);
       write4bits(value);
@@ -360,11 +360,11 @@ void LiquidCrystal::send(uint8_t value, uint8_t mode) {
   {
     bitWrite(_bitString, _rs_pin, mode); //set RS to mode
     spiSendOut();
-    
+
     // we are not using RW with SPI so we are not even bothering
     // or 8BITMODE so we go straight to write4bits
     write4bits(value>>4);
-    write4bits(value);    
+    write4bits(value);
   }
 }
 
@@ -408,7 +408,7 @@ void LiquidCrystal::write4bits(uint8_t value) {
     }
     // add the backlight bit on all transfers
     bitWrite(_bitString, _backlight_pin, (_backlight & 0x01));
-    
+
     // and send it out
     spiSendOut();
   }
@@ -442,19 +442,19 @@ void LiquidCrystal::writeSlow(uint8_t value) {
 }
 
 inline void LiquidCrystal::writeFast(uint8_t value) {
-  PIN_MAP[_latchPin].gpio_peripheral->BRR = PIN_MAP[_latchPin].gpio_pin; // Latch Low
+  pinResetFast(_latchPin); // Latch Low
   for (uint8_t i = 0; i < 8; i++)  {
     if (value & (1 << (7-i))) { // walks down mask from bit 7 to bit 0
-      PIN_MAP[_sdatPin].gpio_peripheral->BSRR = PIN_MAP[_sdatPin].gpio_pin; // Data High
-    } 
+      pinSetFast(_sdatPin); // Data High
+    }
     else {
-      PIN_MAP[_sdatPin].gpio_peripheral->BRR = PIN_MAP[_sdatPin].gpio_pin; // Data Low
+      pinResetFast(_sdatPin); // Data Low
     }
     asm volatile("mov r0, r0" "\n\t" "nop" "\n\t" "nop" "\n\t" "nop" "\n\t" ::: "r0", "cc", "memory");
-    PIN_MAP[_sclkPin].gpio_peripheral->BSRR = PIN_MAP[_sclkPin].gpio_pin; // Clock High (Data Shifted In)
+    pinSetFast(_sclkPin); // Clock High (Data Shifted In)
     asm volatile("mov r0, r0" "\n\t" "nop" "\n\t" "nop" "\n\t" "nop" "\n\t" ::: "r0", "cc", "memory");
-    PIN_MAP[_sclkPin].gpio_peripheral->BRR = PIN_MAP[_sclkPin].gpio_pin; // Clock Low
+    pinResetFast(_latchPin); // Clock Low
   }
   asm volatile("mov r0, r0" "\n\t" "nop" "\n\t" "nop" "\n\t" "nop" "\n\t" ::: "r0", "cc", "memory");
-  PIN_MAP[_latchPin].gpio_peripheral->BSRR = PIN_MAP[_latchPin].gpio_pin; // Latch High (Data Latched)
+  pinSetFast(_latchPin); // Latch High (Data Latched)
 }
